@@ -17,24 +17,11 @@ RUN apt-get -o Acquire::Max-FutureTime=86400 update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && git lfs install
 
-# COMPILE OPENCV
-WORKDIR /tmp
-RUN git clone https://github.com/opencv/opencv
-RUN git clone https://github.com/opencv/opencv_contrib
+# INSTALL OPENCV
+RUN apt-get update
+RUN apt-get install libopencv-dev python3-opencv -y
 
-WORKDIR /tmp/opencv
-RUN mkdir /tmp/opencv/build
-WORKDIR /tmp/opencv/build
-
-RUN cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_V4L=ON -D INSTALL_PYTHON_EXAMPLES=ON -D OPENCV_EXTRA_MODULES_PATH=/tmp/opencv_contrib/modules ..
-RUN make
-RUN make install
-RUN echo "/usr/local/lib" > /etc/ld.so.conf.d/opencv.conf
-RUN ldconfig
-
-WORKDIR /
-RUN rm -rf /tmp/*
-
+# PREPARE WORKING DIR AND SETUP PYTHON ENV
 WORKDIR /code
 COPY ./requirements.txt /code/requirements.txt
 
