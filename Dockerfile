@@ -45,9 +45,11 @@ RUN pyenv install $PYTHON_VERSION && \
 VOLUME ["/src"]
 WORKDIR /src
 
+RUN pip install --upgrade pip
 RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
 RUN pip install jupyter jupyterlab
 RUN pip install pandas matplotlib tqdm scikit-learn scikit-image numpy scipy h5py tensorflow
+RUN pip install opencv-contrib-python-headless
 
 # START THE SSH SERVER
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
