@@ -1,4 +1,4 @@
-version: '3.5'
+version: '3.8'
 
 services:
   jupyter:
@@ -8,19 +8,23 @@ services:
     container_name: jupyter
     ports:
       - "8888:8888"
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+      - JUPYTER_TOKEN=password
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              device_ids: ['0', '1']
+              count: all
               capabilities: [gpu]
-    environment:
-      - JUPYTER_TOKEN=password
     volumes:
       - ./data:/src:rw,cached
     networks:
       - jupyter
+    restart: unless-stopped
 
 networks:
   jupyter:

@@ -1,9 +1,13 @@
-ARG CUDA_VERSION=12.1.1
+ARG CUDA_VERSION=12.8.0
 ARG PYTHON_VERSION=3.10.12
 
-FROM nvidia/cuda:${CUDA_VERSION}-cudnn8-devel-ubuntu22.04
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn9-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive TZ=America/Toronto
+
+# Set NVIDIA runtime environment variables for RTX 4090/5090
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 
 RUN apt-get -o Acquire::Max-FutureTime=86400 update && apt-get install -y \
     git vim curl \
@@ -18,8 +22,7 @@ RUN apt-get -o Acquire::Max-FutureTime=86400 update && apt-get install -y \
     && git lfs install
 
 # INSTALL OPENCV
-RUN apt-get update
-RUN apt-get install libopencv-dev python3-opencv -y
+RUN apt-get update && apt-get install libopencv-dev python3-opencv -y && rm -rf /var/lib/apt/lists/*
 
 # PREPARE WORKING DIR AND SETUP PYTHON ENV
 WORKDIR /code
@@ -46,10 +49,14 @@ VOLUME ["/src"]
 WORKDIR /src
 
 RUN pip install --upgrade pip
-RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu121
+# Install PyTorch with CUDA 12.8 support for RTX 4090/5090
+RUN pip install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu128
 RUN pip install jupyter jupyterlab
 RUN pip install pandas matplotlib tqdm scikit-learn scikit-image numpy scipy h5py tensorflow
 RUN pip install opencv-contrib-python-headless
 
-# START THE SSH SERVER
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root"]
+# Expose Jupyter port
+EXPOSE 8888
+
+# Start Jupyter Lab (removed --allow-root since we're running as non-root user)
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--NotebookApp.token=${JUPYTER_TOKEN:-password}"]
