@@ -10,6 +10,7 @@ services:
       - NVIDIA_VISIBLE_DEVICES=all
       - NVIDIA_DRIVER_CAPABILITIES=compute,utility
       - JUPYTER_TOKEN=password
+      # - JUPYTER_PASSWORD=your_password_here  # Uncomment to use password instead of token
     deploy:
       resources:
         reservations:

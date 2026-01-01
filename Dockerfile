@@ -27,8 +27,13 @@ RUN apt-get update && apt-get install libopencv-dev python3-opencv -y && rm -rf 
 # PREPARE WORKING DIR AND SETUP PYTHON ENV
 WORKDIR /code
 COPY ./requirements.txt /code/requirements.txt
+COPY ./start-jupyter.sh /tmp/start-jupyter.sh
 
-RUN useradd -m -u 1000 user
+RUN useradd -m -u 1000 user && \
+    chmod +x /tmp/start-jupyter.sh && \
+    mv /tmp/start-jupyter.sh /home/user/start-jupyter.sh && \
+    chown user:user /home/user/start-jupyter.sh
+
 USER user
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH
@@ -58,5 +63,5 @@ RUN pip install opencv-contrib-python-headless
 # Expose Jupyter port
 EXPOSE 8888
 
-# Start Jupyter Lab (removed --allow-root since we're running as non-root user)
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--NotebookApp.token=${JUPYTER_TOKEN:-password}"]
+# Start Jupyter Lab using the startup script
+CMD ["/home/user/start-jupyter.sh"]
