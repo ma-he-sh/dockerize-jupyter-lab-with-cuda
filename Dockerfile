@@ -1,7 +1,7 @@
-ARG CUDA_VERSION=12.8.0
+ARG CUDA_VERSION=12.8.1
 ARG PYTHON_VERSION=3.10.12
 
-FROM nvidia/cuda:${CUDA_VERSION}-cudnn9-devel-ubuntu22.04
+FROM nvidia/cuda:${CUDA_VERSION}-cudnn-devel-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive TZ=America/Toronto
 
